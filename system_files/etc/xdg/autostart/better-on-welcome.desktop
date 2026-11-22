@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Better On Welcome
+Comment=First login introduction for Better On
+Exec=/usr/bin/better-on-welcome --first-login
+Icon=better-on
+Terminal=false
+OnlyShowIn=KDE;

@@ -1,0 +1,7 @@
+# Never commit signing material or local build outputs.
+/cosign.key
+/cosign.pub
+*.pem
+/_build/
+/output/
+/result/

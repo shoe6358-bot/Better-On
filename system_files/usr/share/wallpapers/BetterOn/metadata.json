@@ -1,0 +1,15 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Better On contributors"
+      }
+    ],
+    "Id": "BetterOn",
+    "License": "CC-BY-4.0",
+    "Name": "Better On"
+  },
+  "X-KDE-PlasmaImageWallpaper-AccentColor": {
+    "Dark": "#75c9ff"
+  }
+}

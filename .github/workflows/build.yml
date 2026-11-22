@@ -1,0 +1,146 @@
+name: Build bootc image
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and lint ${{ matrix.variant }} image
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: desktop
+            base_image: ghcr.io/ublue-os/bazzite:stable
+            image_tag: desktop-ci
+          - variant: nvidia
+            base_image: ghcr.io/ublue-os/bazzite-nvidia:stable
+            image_tag: nvidia-ci
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Free runner disk space
+        uses: ublue-os/remove-unwanted-software@695eb75bc387dbcd9685a8e72d23439d8686cba6
+
+      - name: Check KDE default seeding
+        run: bash build_files/test-seed-kde-defaults.sh
+
+      - name: Validate Better On Hub catalog
+        run: node tests/validate-hub-catalog.mjs
+
+      - name: Validate installer safety configuration
+        run: node tests/validate-installer-workflow.mjs
+
+      - name: Validate Better On VM image workflow
+        run: node tests/validate-vm-image-workflow.mjs
+
+      - name: Validate Better On live ISO workflow
+        run: node tests/validate-live-iso.mjs
+
+      - name: Validate Better On Gaming data sources
+        run: node tests/validate-gaming-dashboard.mjs
+
+      - name: Validate Better On Welcome flow
+        run: node tests/validate-welcome.mjs
+
+      - name: Install Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes jq podman shellcheck
+
+      - name: Check bootc signature policy configuration
+        run: bash build_files/test-configure-signature-policy.sh
+
+      - name: Lint shell scripts
+        run: shellcheck build_files/*.sh
+
+      - name: Install Cosign for base image verification
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: 'v3.1.3'
+
+      - name: Resolve immutable Bazzite base image
+        env:
+          BASE_IMAGE: ${{ matrix.base_image }}
+        run: |
+          set -euo pipefail
+          podman pull "$BASE_IMAGE"
+          image_digest=$(podman image inspect --format '{{.Digest}}' "$BASE_IMAGE")
+          [[ "$image_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo "Could not resolve Bazzite base image digest." >&2; exit 1; }
+          image_repository="${BASE_IMAGE%%:*}"
+          immutable_ref="${image_repository}@${image_digest}"
+          cosign verify --new-bundle-format=false --key build_files/bazzite-cosign.pub "$immutable_ref"
+          echo "BASE_IMAGE=${immutable_ref}" >> "$GITHUB_ENV"
+
+      - name: Build bootc image
+        env:
+          IMAGE_SOURCE: https://github.com/${{ github.repository }}
+          IMAGE_TAG: ${{ matrix.image_tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          image_repository="ghcr.io/${GITHUB_REPOSITORY,,}"
+          podman build --pull=newer \
+            --build-arg "IMAGE_SOURCE=$IMAGE_SOURCE" \
+            --build-arg "BASE_IMAGE=$BASE_IMAGE" \
+            --build-arg "IMAGE_REPOSITORY=$image_repository" \
+            --tag "better-on:$IMAGE_TAG" --file Containerfile .
+
+      - name: Verify Better On signing key pair
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+        run: |
+          set -euo pipefail
+          test -s build_files/cosign.pub || { echo "Add the Better On public key at build_files/cosign.pub." >&2; exit 1; }
+          test -n "$COSIGN_PRIVATE_KEY" || { echo "Configure the SIGNING_SECRET repository secret." >&2; exit 1; }
+          cosign public-key --key env://COSIGN_PRIVATE_KEY | tr -d '\r' | diff -u <(tr -d '\r' < build_files/cosign.pub) -
+
+      - name: Publish image to GitHub Container Registry
+        if: github.event_name != 'pull_request' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_USER: ${{ github.actor }}
+          IMAGE_NAME: ${{ github.event.repository.name }}
+          IMAGE_VARIANT: ${{ matrix.variant }}
+          IMAGE_TAG: ${{ matrix.image_tag }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+        run: |
+          set -euo pipefail
+          image_name="${IMAGE_NAME,,}"
+          echo "$GH_TOKEN" | podman login ghcr.io --username "$GH_USER" --password-stdin
+          image_ref="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${image_name}"
+          if [[ "$IMAGE_VARIANT" == "nvidia" ]]; then
+            commit_tag="nvidia-${GITHUB_SHA}"
+            latest_tag="nvidia-latest"
+          else
+            commit_tag="$GITHUB_SHA"
+            latest_tag="latest"
+          fi
+          podman tag "better-on:${IMAGE_TAG}" "${image_ref}:${commit_tag}"
+          digest_file=$(mktemp)
+          podman push --digestfile "$digest_file" "${image_ref}:${commit_tag}"
+          image_digest=$(<"$digest_file")
+          rm -f "$digest_file"
+          podman tag "better-on:${IMAGE_TAG}" "${image_ref}:${latest_tag}"
+          podman push "${image_ref}:${latest_tag}"
+          cosign sign -y --new-bundle-format=false --use-signing-config=false \
+            --registry-referrers-mode=legacy \
+            --key env://COSIGN_PRIVATE_KEY "${image_ref}@${image_digest}"
+          cosign verify --key build_files/cosign.pub "${image_ref}@${image_digest}"

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Better On Gaming
+Comment=View live hardware and system resource information
+Exec=/usr/bin/better-on-gaming
+Icon=applications-games
+Terminal=false
+Categories=Game;Settings;System;

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" role="img" aria-labelledby="title desc">
+  <title id="title">Better On</title>
+  <desc id="desc">Dark charcoal wallpaper with the Better On mark and icy blue accents.</desc>
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111820"/>
+      <stop offset="1" stop-color="#19232d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9bdcff"/>
+      <stop offset="1" stop-color="#58b5ec"/>
+    </linearGradient>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#field)"/>
+  <path d="M1950 2160 3270 0h570v2160z" fill="#202d39" opacity=".38"/>
+  <path d="M2570 2160 3760 250v950l-590 960z" fill="#273744" opacity=".32"/>
+  <path d="M2150 2160 3440 0" fill="none" stroke="#89cfff" stroke-opacity=".09" stroke-width="3"/>
+  <path d="M2850 2160 3840 570" fill="none" stroke="#89cfff" stroke-opacity=".07" stroke-width="3"/>
+  <g transform="translate(2835 1030)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0-350a350 350 0 1 0 350 350" stroke="url(#accent)" stroke-width="76"/>
+    <path d="M0-174v348m0-174h155" stroke="#eff6fa" stroke-width="64"/>
+  </g>
+  <text x="2835" y="1560" fill="#eff6fa" font-family="Inter, Noto Sans, sans-serif" font-size="92" font-weight="650" letter-spacing="13">BETTER ON</text>
+  <text x="2840" y="1642" fill="#9aaab8" font-family="Inter, Noto Sans, sans-serif" font-size="34" font-weight="400" letter-spacing="3">GAMING, WITHOUT THE FUSS.</text>
+</svg>

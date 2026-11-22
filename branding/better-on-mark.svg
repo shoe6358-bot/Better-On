@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Better On mark</title>
+  <desc id="desc">A blue open ring with a forward-moving notch.</desc>
+  <rect width="256" height="256" rx="56" fill="#151b22"/>
+  <path d="M128 40a88 88 0 1 0 88 88" fill="none" stroke="#75c9ff" stroke-linecap="round" stroke-width="24"/>
+  <path d="M128 84v88m0-44h39" fill="none" stroke="#f1f6fa" stroke-linecap="round" stroke-linejoin="round" stroke-width="20"/>
+</svg>

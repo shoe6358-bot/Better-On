@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Better On Welcome
+Comment=Get started with your Better On desktop
+Exec=/usr/bin/better-on-welcome
+Icon=better-on
+Terminal=false
+Categories=System;Settings;

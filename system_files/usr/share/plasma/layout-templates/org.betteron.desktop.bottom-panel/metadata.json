@@ -1,0 +1,22 @@
+{
+  "KPackageStructure": "Plasma/LayoutTemplate",
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Better On contributors"
+      }
+    ],
+    "Category": "",
+    "Description": "Bottom panel with the Better On application menu, task manager, system tray, clock, and show desktop control",
+    "Id": "org.betteron.desktop.bottom-panel",
+    "Icon": "better-on",
+    "License": "GPL-2.0-or-later",
+    "Name": "Better On Bottom Panel",
+    "Version": "0.1"
+  },
+  "X-KDE-PluginInfo-Name": "org.betteron.desktop.bottom-panel",
+  "X-Plasma-ContainmentCategories": [
+    "panel"
+  ],
+  "X-Plasma-Shell": "plasmashell"
+}

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Better On Hub
+Comment=Browse and install applications from Flathub
+Exec=/usr/bin/better-on-hub
+Icon=better-on
+Terminal=false
+Categories=Utility;System;

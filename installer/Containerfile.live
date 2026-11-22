@@ -1,0 +1,24 @@
+ARG BASE_IMAGE
+ARG INSTALL_IMAGE_PAYLOAD
+ARG INSTALL_IMAGE_VARIANT=desktop
+ARG FLATPAK_DIR_SHORTNAME=kde_flatpaks
+
+FROM ${BASE_IMAGE}
+ARG BASE_IMAGE
+ARG INSTALL_IMAGE_PAYLOAD
+ARG INSTALL_IMAGE_VARIANT
+ARG FLATPAK_DIR_SHORTNAME
+
+# Bazzite's pinned installer build prepares the KDE live session and Anaconda.
+RUN --mount=type=bind,source=./.,target=/src \
+    env \
+    BASE_IMAGE="$BASE_IMAGE" \
+    INSTALL_IMAGE_PAYLOAD="$INSTALL_IMAGE_PAYLOAD" \
+    INSTALL_IMAGE_VARIANT="$INSTALL_IMAGE_VARIANT" \
+    FLATPAK_DIR_SHORTNAME="$FLATPAK_DIR_SHORTNAME" \
+    /usr/bin/bash /src/build.sh
+
+# Restore Better On branding and desktop defaults after the upstream live-ISO hooks.
+COPY better-on-system-files/ /
+COPY build_files/seed-kde-defaults.sh /usr/libexec/better-on-seed-kde-defaults.sh
+RUN /usr/bin/bash /usr/libexec/better-on-seed-kde-defaults.sh /

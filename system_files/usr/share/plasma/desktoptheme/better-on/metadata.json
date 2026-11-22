@@ -1,0 +1,14 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "Better On contributors"
+      }
+    ],
+    "Description": "Dark Better On desktop style with an original matching wallpaper",
+    "Id": "better-on",
+    "License": "CC-BY-4.0",
+    "Name": "Better On",
+    "Version": "0.1"
+  }
+}
