@@ -50,8 +50,3 @@ The current desktop assets are source files only. The Plasma style references it
 ## Contributing
 
 Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), then implement the next phase without claiming untested features. Record the exact build environment and test results in project documentation.
-
-
-
-
-
